@@ -37,8 +37,8 @@ async function run() {
         // Country data Api
         app.get('/allProduct', async (req, res) => {
             try {
-                const { searchText, brand, category, priceRange, sortBy } = req.query;
-                console.log(searchText, brand, category);
+                const { searchText, brand, category, priceRange, sortBy, page, size } = req.query;
+                console.log(page, size);
                 // Build query object based on parameters
                 const query = {};
                 if (searchText) query.productName = searchText;
@@ -47,7 +47,7 @@ async function run() {
                 if (priceRange) query.price = { $lte: parseFloat(priceRange) };
 
                 // Fetch products with query object
-                let result = AllProductsCollections.find(query);
+                let result = AllProductsCollections.find(query).skip(parseInt(page) * parseInt(size)).limit(parseInt(size));
 
                 if (sortBy) {
                     // Example sorting by price: { price: 1 } for ascending, { price: -1 } for descending
@@ -61,7 +61,10 @@ async function run() {
                 res.status(500).send('Internal Server Error');
             }
         });
-
+        app.get('/countOfProduct', async (req, res) => {
+                const count = await AllProductsCollections.estimatedDocumentCount() ;
+                res.send({count })
+        })
         // Apis------------------------>>>END
 
 
